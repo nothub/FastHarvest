@@ -20,6 +20,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static org.bukkit.Material.*;
 
+@SuppressWarnings("unused")
 public final class Plugin extends JavaPlugin implements Listener {
 
     private static final Set<Material> crops = Set.of(WHEAT, CARROTS, POTATOES, BEETROOTS, NETHER_WART);
