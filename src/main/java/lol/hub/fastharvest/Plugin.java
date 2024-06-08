@@ -93,7 +93,7 @@ public final class Plugin extends JavaPlugin implements Listener {
 
         // damage tool
         if (tool.getItemMeta() instanceof Damageable damageable) {
-            var damageChance = 100 / (tool.getEnchantmentLevel(Enchantment.DURABILITY) + 1);
+            var damageChance = 100 / (tool.getEnchantmentLevel(Enchantment.UNBREAKING) + 1);
             if (ThreadLocalRandom.current().nextInt(1, 100 + 1) <= damageChance) {
                 damageable.setDamage(damageable.getDamage() + 1);
                 tool.setItemMeta(damageable);
