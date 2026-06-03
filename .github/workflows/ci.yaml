@@ -43,4 +43,4 @@ jobs:
           modrinth-token: '${{ secrets.MODRINTH_TOKEN }}'
           files: 'build/dist/*.jar'
           loaders: 'paper'
-          game-versions: '${{ env.MINECRAFT_VERSION }}.x'
+          game-versions: '${{ env.MINECRAFT_VERSION }}'
