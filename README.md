@@ -1,6 +1,6 @@
 # FastHarvest
 
-Get that produce
+Paper plugin. Get that produce
 
 [Modrinth](https://modrinth.com/mod/fastharvest)  
 [GitHub](https://github.com/nothub/fastharvest/releases)
