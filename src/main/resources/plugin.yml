@@ -2,7 +2,7 @@ name: 'FastHarvest'
 version: '@mod_version@'
 api-version: '@minecraft_version@'
 main: 'lol.hub.fastharvest.Plugin'
-description: 'Tidy up them containers'
+description: 'Get that produce'
 website: 'https://github.com/nothub/FastHarvest'
 authors: [ 'nothub' ]
 contributors: [ ]
