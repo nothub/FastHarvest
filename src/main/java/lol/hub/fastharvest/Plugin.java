@@ -2,6 +2,7 @@ package lol.hub.fastharvest;
 
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.enchantments.Enchantment;
@@ -110,22 +111,7 @@ public final class Plugin extends JavaPlugin implements Listener {
     }
 
     private boolean isHoe(@Nullable ItemStack stack) {
-        if (stack == null) return false;
-        return switch (stack.getType()) {
-            case WOODEN_HOE,
-                 STONE_HOE,
-                 GOLDEN_HOE,
-                 IRON_HOE,
-                 DIAMOND_HOE,
-                 NETHERITE_HOE,
-                 LEGACY_WOOD_HOE,
-                 LEGACY_STONE_HOE,
-                 LEGACY_GOLD_HOE,
-                 LEGACY_IRON_HOE,
-                 LEGACY_DIAMOND_HOE
-                    -> true;
-            default -> false;
-        };
+        return stack != null && Tag.ITEMS_HOES.isTagged(stack.getType());
     }
 
 }
