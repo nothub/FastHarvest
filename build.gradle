@@ -56,13 +56,6 @@ tasks.withType(JavaCompile).configureEach {
     it.options.encoding = 'UTF-8'
 }
 
-tasks {
-    runServer {
-        minecraftVersion("${project.minecraft_version}")
-        jvmArgs("-Dcom.mojang.eula.agree=true", "-DPaper.skipServerPropertiesComments=true")
-    }
-}
-
 processResources {
     def modVersion = version
     def mcVersion = minecraft_version
@@ -79,7 +72,7 @@ jar.archiveFileName.set("${project.name.toLowerCase()}-${project.version}+${proj
 jar.destinationDirectory.set(layout.buildDirectory.dir('dist'))
 
 // The Paper build to test on comes from the pin asset of the TestUtils release, so it is known only
-// once that asset is resolved. Call this from task actions only: `clean` and `tasks` need no network.
+// once that asset is resolved. Call this only from tasks that need Paper: `clean` and `tasks` need no network.
 def pinnedPaper = {
     def pin = new Properties()
     configurations.testutilsPin.singleFile.withInputStream { pin.load(it) }
@@ -88,10 +81,11 @@ def pinnedPaper = {
     }
     // TestUtils' own cache path and name, so every build pinned to that Paper build shares one download.
     def jar = new File(gradle.gradleUserHomeDir, "caches/testutils/paper/paper-${pin.minecraft_version}-${pin.paper_build}.jar")
-    [mc: pin.minecraft_version, build: pin.paper_build, sha256: pin.paper_sha256, jar: jar]
+    // Paperclip patches into `repo`, shared by every run against this jar.
+    [mc: pin.minecraft_version, build: pin.paper_build, sha256: pin.paper_sha256, jar: jar, repo: new File(jar.parentFile, 'repo')]
 }
 
-// Runs before the test task resolves `testutilsPlugin`: a release for another MC version has no
+// Runs before `test` and `runServer` resolve `testutilsPlugin`: a release for another MC version has no
 // plugin jar under this project's classifier, and the mismatch would otherwise surface as a 404.
 def paperJar = tasks.register('paperJar') {
     doLast {
@@ -144,6 +138,46 @@ tasks.named('test') {
         systemProperty 'testutils.pluginJar', pluginUnderTest.get().asFile.path
         systemProperty 'testutils.testutilsJar', testutilsPlugin.singleFile.path
         systemProperty 'testutils.paperJar', paper.jar.path
-        systemProperty 'testutils.paperRepo', new File(paper.jar.parentFile, 'repo').path
+        systemProperty 'testutils.paperRepo', paper.repo.path
+    }
+}
+
+// A human joins at localhost, an agent drives the console over RCON. Loopback only, so the
+// fixed password exposes nothing beyond this machine. Written on every launch: run/ outlives the sessions.
+def runServerProperties = [
+        'server-ip'        : '127.0.0.1',
+        'server-port'      : '25565',
+        'online-mode'      : 'false',
+        'white-list'       : 'false',
+        'enforce-whitelist': 'false',
+        'enable-rcon'      : 'true',
+        'rcon.port'        : '25575',
+        'rcon.password'    : 'testutils',
+]
+
+tasks.named('runServer') {
+    minecraftVersion("${project.minecraft_version}")
+    // The same pinned jar the tests boot, so a failing test reproduces on the same build.
+    // Without this run-paper fetches the latest build.
+    dependsOn paperJar
+    serverJar(layout.file(provider { pinnedPaper().jar }))
+    pluginJars(configurations.testutilsPlugin)
+    jvmArgs("-Dcom.mojang.eula.agree=true", "-DPaper.skipServerPropertiesComments=true")
+    // Without a shared bundler repo every run/ directory downloads and patches Paper again.
+    jvmArgumentProviders.add({ ["-DbundlerRepoDir=" + pinnedPaper().repo] } as CommandLineArgumentProvider)
+    doFirst {
+        def file = runDirectory.file('server.properties').get().asFile
+        def written = [] as Set
+        def lines = (file.isFile() ? file.readLines() : []).collect { line ->
+            def key = line.split('=', 2)[0].trim()
+            if (!line.startsWith('#') && runServerProperties.containsKey(key)) {
+                written << key
+                return "${key}=${runServerProperties[key]}".toString()
+            }
+            line
+        }
+        runServerProperties.each { key, value -> if (!(key in written)) lines << "${key}=${value}".toString() }
+        file.parentFile.mkdirs()
+        file.text = lines.join('\n') + '\n'
     }
 }
