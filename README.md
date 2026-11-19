@@ -2,8 +2,8 @@
 
 Paper plugin. Get that produce.
 
-[Modrinth](https://modrinth.com/mod/fastharvest)  
-[GitHub](https://github.com/nothub/fastharvest/releases)
+[![GitHub](https://img.shields.io/github/stars/nothub/fastharvest)](https://github.com/nothub/fastharvest)
+[![Modrinth](https://img.shields.io/modrinth/dt/ah8k3QBZ?label=Modrinth)](https://modrinth.com/mod/fastharvest)
 
 ---
 
