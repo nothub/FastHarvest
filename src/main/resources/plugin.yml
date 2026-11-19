@@ -3,6 +3,6 @@ version: '@mod_version@'
 api-version: '@minecraft_version@'
 main: 'lol.hub.fastharvest.Plugin'
 description: 'Get that produce'
-website: 'https://github.com/nothub/FastHarvest'
+website: 'https://github.com/nothub/fastharvest'
 authors: [ 'nothub' ]
 contributors: [ ]
